@@ -1,0 +1,8 @@
+Quando tu abre o ativo = 
+
+Quantidade que tu compro + quantidade de ativos 
+
+
+
+
+Quando o ativo ja ta aberto: Quantidade que tu tinha + Quantidade que tu comprou / quantidade que tu tinha + quantidade que tu compro
