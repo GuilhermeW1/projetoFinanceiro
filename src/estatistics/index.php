@@ -1,7 +1,7 @@
 <?php
 
 //session_start();
-include('../../controllers/verificaSessao.php');
+include('../../controllers/VerificaSessao.php');
 $con = require('../../database/connection.php');
 
 ?>
@@ -14,6 +14,11 @@ $con = require('../../database/connection.php');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estatisticas</title>
     <?php include('../../style/style.php'); ?>
+    <style>
+        tr:nth-child(even){
+            background-color: lightgray;
+        }
+    </style>
 </head>
 
 
@@ -32,7 +37,7 @@ $con = require('../../database/connection.php');
 
     
     <div class="container">
-        <table class="table mt-5">
+        <table class="table mt-5 ">
             <thead>
                 <th scope="col">Ativo</th>
                 <th scope="col">Data de Compra/Venda</th>

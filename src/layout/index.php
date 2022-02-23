@@ -7,13 +7,13 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-                <a class="nav-link" href="../home/index.php">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-link" href="../home/index.php" target="_self">Home <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="../movements/index.php">Movimentações</a>
+                <a class="nav-link" href="../movements/index.php" target="_self">Movimentações</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="../estatistics/index.php">Estatisticas</a>
+            <li class="nav-itzem">
+                <a class="nav-link" href="../estatistics/index.php" target="_self">Estatisticas</a>
             </li>
             <li class="nav-item dropdown  active" style="margin-inline: 10px;">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
