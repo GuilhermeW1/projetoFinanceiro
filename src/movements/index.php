@@ -3,9 +3,10 @@
 
 
 
-include('../../controllers/verificaSessao.php');
+include('../../controllers/VerificaSessao.php');
 
-$con = require '../../database/connection.php';
+
+$con = require '../../database/Connection.php';
 
 ?>
 <!DOCTYPE html>
@@ -38,7 +39,7 @@ $con = require '../../database/connection.php';
 
     <div class="container">
 
-        <form action="../../controllers/movementsController.php" method="POST">
+        <form action="../../controllers/MovementsController.php" method="POST">
             <div class="row mt-5">
                 <div class="col-sm-4">
                     
@@ -48,12 +49,31 @@ $con = require '../../database/connection.php';
                             <option value=0>Ativo</option>
 
                             <?php  
+                                
                                 $sql = "select id_ativo,cd_ativo from ativo order by cd_ativo";
                                 $stmt =  $con->prepare($sql);
                                 $stmt->execute();
                                 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
                                     echo ("<option value={$row['id_ativo']}>{$row['cd_ativo']}</option>") ;
                                 }
+
+                                /*
+                                $ar = require '../../controllers/AtivoController.php';
+                                 
+                                //$arr = $ativo->a();
+
+                                $cont=0;
+
+                                for($i = 0; ;$i++){
+                                    if(isset($ar[$i])){
+                                    $at = $ar[$i];
+                                    echo ("<option value={$at['id_ativo']}>{$at['cd_ativo']}</option>") ;
+                                    }else{
+                                        break;
+                                    }
+
+                                }
+                                */
 
                             ?>
 
@@ -98,14 +118,14 @@ $con = require '../../database/connection.php';
 
                     <label for="" class="mb-2">Compra / Venda</label>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" checked>
+                        <input class="form-check-input" type="radio" name="tpcompra" value="compra" id="flexRadioDefault1" checked>
                         <label class="form-check-label" for="flexRadioDefault1">
                             Compra
                         </label>
                     </div>
                     
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" >
+                        <input class="form-check-input" type="radio" name="tpcompra" value="venda" id="flexRadioDefault2" >
                         <label class="form-check-label" for="flexRadioDefault2">
                             Venda
                         </label>
@@ -114,16 +134,16 @@ $con = require '../../database/connection.php';
                 </div>
                 
                 <div class="col-sm-4 mt-3">
-
+                    <label for="" class="mb-2">TP operacao</label>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefaulta" id="flexRadioDefault3" checked>
+                        <input class="form-check-input" type="radio" name="tpoperacao" value="swing" id="flexRadioDefault3" checked>
                         <label class="form-check-label" for="flexRadioDefault3">
                             Swing Trade
                         </label>
                     </div>
                     
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="flexRadioDefaulta" id="flexRadioDefault4" >
+                        <input class="form-check-input" type="radio" name="tpoperacao" value="trade" id="flexRadioDefault4" >
                         <label class="form-check-label" for="flexRadioDefault4">
                             Day Trade
                         </label>

@@ -41,7 +41,7 @@ if (isset($_SESSION['user'])) {
                 <div id="login-column" class="col-md-6">
                     <div id="login-box" class="col-md-12">
 
-                        <form id="login-form" class="form" action="../../controllers/loginController.php" method="post">
+                        <form id="login-form" class="form" action="../../controllers/LoginController.php" method="post">
                             <h3 class="text-center text-info">Login</h3>
 
                             <div class="form-group">
