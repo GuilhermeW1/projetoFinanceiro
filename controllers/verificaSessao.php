@@ -15,16 +15,10 @@ if(!isset($_SESSION['user'])){
 
 
 function check(){
+    
     $a = $this->verificar();
-    /*if($a){
+    
 
-        return true;
-    }else{
-        
-        header('Location: ../../src/login/index.php');
-        return false;
-    }
-    */
 }
 
 

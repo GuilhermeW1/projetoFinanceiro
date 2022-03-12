@@ -13,14 +13,14 @@ if(isset($_POST['user']) && isset($_POST['password']) ){
 
     $con = require '../database/connection.php';
 
-    $sql ="select id_user, user, senha from users where user = '$user' and senha = '$password' ";
+    $sql ="select idUser, user, password from users where user = '$user' and password = '$password' ";
 
     $result =  $con->query($sql);
 
     $row = $result->fetch(PDO::FETCH_ASSOC);
     if(isset($row['user'])){
         $_SESSION['user'] = $row['user'];
-        $_SESSION['id_user'] = $row['id_user'];
+        $_SESSION['idUser'] = $row['idUser'];
         return true;
 
         //header ('Location: ../src/home/index.php');
@@ -46,7 +46,7 @@ if(isset($_POST['user']) && isset($_POST['password']) ){
 }
 
 //esta e a funcao publica chamada para fazer o login
-public function a(){
+public function login(){
     $var = $this->logar();
     if($var){
         header ('Location: ../src/home/index.php');
@@ -62,7 +62,7 @@ public function a(){
 }
 
 $logar = new LoginController;
-$logar->a();
+$logar->login();
 
 /*
 if($bol){

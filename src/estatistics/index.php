@@ -51,19 +51,20 @@ $con = require('../../database/connection.php');
 
             <tbody>
                 <?php
-                $sql = "select a.cd_ativo as ativo, date_format(m.dt_moviement, '%d-%m-%Y') as data, 
-                    m.qnt_ativo as qntd, m.vlr_ativo as valor, m.vlr_total as total, 
-                    c.cm as cmm, c.total as totalCm, c.qntd as qntdTotal
-                    from moviements m, cm c, users u, ativo a
-                    where m.id_moviements = c.id_moviement
-                    and m.id_user = u.id_user
-                    and m.id_ativo = a.id_ativo
-                    and u.id_user = ?
-                    order by  m.id_moviements
+                $id = $_SESSION['idUser'];
+                $sql = " select a.cdAtivo as ativo, date_format(m.dtMoviement, '%d-%m-%Y') as data, 
+                m.qntdAtivos as qntd, m.vlrAtivo as valor, m.vlrTotal as total, 
+                c.cm as cmm, c.total as totalCm, c.qntd as qntdTotal
+                from moviements m, cm c, users u, ativo a
+                where m.idMoviement = c.idMoviement
+                and m.idUser = u.idUser
+                and m.idAtivo = a.idAtivo
+                and u.idUser = $id
+                order by  m.idMoviement
                     ";
 
                 $stmt = $con->prepare($sql);
-                $stmt->execute([$_SESSION['id_user']]);
+                $stmt->execute([$_SESSION['idUser']]);
 
 
 
@@ -92,7 +93,7 @@ $con = require('../../database/connection.php');
                     }
 
                     */
-                $teste;
+                $teste ;
                 $contador = 0;
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     $teste[$contador] = $row;

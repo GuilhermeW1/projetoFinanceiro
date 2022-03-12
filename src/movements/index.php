@@ -50,16 +50,16 @@ $con = require '../../database/Connection.php';
 
                             <?php  
                                 
-                                $sql = "select id_ativo,cd_ativo from ativo order by cd_ativo";
+                                $sql = "select idAtivo,cdAtivo from ativo order by cdAtivo";
                                 $stmt =  $con->prepare($sql);
                                 $stmt->execute();
                                 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-                                    echo ("<option value={$row['id_ativo']}>{$row['cd_ativo']}</option>") ;
+                                    echo ("<option value={$row['idAtivo']}>{$row['cdAtivo']}</option>") ;
                                 }
 
                                 /*
                                 $ar = require '../../controllers/AtivoController.php';
-                                 
+                                
                                 //$arr = $ativo->a();
 
                                 $cont=0;
@@ -114,34 +114,25 @@ $con = require '../../database/Connection.php';
             </div>
 
             <div class="row mt-4">
+                
                 <div class="col-sm-4 mt-3">
 
-                    <label for="" class="mb-2">Compra / Venda</label>
+                    <label for="" class="mb-2">Swing trade</label>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="tpcompra" value="compra" id="flexRadioDefault1" checked>
+                        <input class="form-check-input" type="radio" name="tpoperacao" checked value="compra"  id="flexRadioDefault1" >
                         <label class="form-check-label" for="flexRadioDefault1">
                             Compra
                         </label>
                     </div>
                     
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="tpcompra" value="venda" id="flexRadioDefault2" >
+                        <input class="form-check-input" type="radio" name="tpoperacao" value="venda" id="flexRadioDefault2" >
                         <label class="form-check-label" for="flexRadioDefault2">
                             Venda
                         </label>
 
                     </div>
-                </div>
-                
-                <div class="col-sm-4 mt-3">
-                    <label for="" class="mb-2">TP operacao</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="tpoperacao" value="swing" id="flexRadioDefault3" checked>
-                        <label class="form-check-label" for="flexRadioDefault3">
-                            Swing Trade
-                        </label>
-                    </div>
-                    
+
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="tpoperacao" value="trade" id="flexRadioDefault4" >
                         <label class="form-check-label" for="flexRadioDefault4">
@@ -150,6 +141,25 @@ $con = require '../../database/Connection.php';
 
                     </div>
                 </div>
+                <!--
+                <div class="col-sm-4 mt-3">
+                    <label for="" class="mb-2">TP operacao</label>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tpoperacao" value="swing" id="flexRadioDefault3" checked>
+                        <label class="form-check-label" for="flexRadioDefault3">
+                            Swing Trade
+                        </label>
+                    </div>
+                            
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="tpoperacao" value="trade" id="flexRadioDefault4" >
+                        <label class="form-check-label" for="flexRadioDefault4">
+                            Day Trade
+                        </label>
+
+                    </div>
+                </div>-->
             </div>
 
             <div class="row mt-5 mt-5">

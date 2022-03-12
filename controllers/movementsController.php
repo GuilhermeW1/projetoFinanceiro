@@ -1,219 +1,36 @@
 <?php
 
-/*
-class movimentController
-{
-
-    private function inserir()
-    {
-        session_start();
-        if (
-            isset($_POST['id_ativo']) != 0 && isset($_POST['quantidade'])
-            && isset($_POST['dt_compra']) && isset($_POST['preco_ativo'])
-            && isset($_POST['qnt_ativos'])
-        ) {
-
-            $ativo = $_POST['id_ativo'];
-            $quantidade = $_POST['quantidade'];
-            $dt_compra = $_POST['dt_compra'];
-            $preco = $_POST['preco_ativo'];
-            $precoTotal = $_POST['qnt_ativos'];
-            $tpperacao = $_POST['tpoperacao'];
-            $tpcompra = $_POST['tpcompra'];
-
-
-            $firstMov = $this->verificaPrimeiroRegistro($_SESSION['id_user'], $ativo);
-
-
-            try {
-                $con = require '../database/connection.php';
-
-                $sql = "insert into moviements values(default, ? , ? ,true, true, ? , ?, ?, ?, '2022/01/11'  )";
-                $stmt = $con->prepare($sql);
-                $result = $stmt->execute([$_SESSION['id_user'], $ativo, $quantidade, $preco, $precoTotal, $dt_compra]);
-            } catch (PDOException $e) {
-                echo 'erro ' . $e->getMessage();
-            }
-
-            if ($result) {
-                $id_moviement = $this->maxIdMoviement();
-
-
-                if (!$firstMov) {
-                    //vai pegar o ultimo id inserido no banco que sera o id adicionado a cima
-
-                    //vai descontar um para pegar o valor id do valor antes de ser adicionado o de cima
-                    //idmovimentacao old
-
-                    try {
-                        $id_old = $this->penultimoInsert($ativo, $_SESSION['id_user']);
-
-
-                        $sql = "select * from cm where id_moviement = $id_old";
-
-                        $result = $con->query($sql);
-
-                        $row = $result->fetch(PDO::FETCH_ASSOC);
-
-                        $old_total = $row['total'];
-                        $old_qntd = $row['qntd'];
-                        //aqui e definido os calculos e o que vai para o banco
-                        $cm = ($precoTotal + $old_total) / ($quantidade + $old_qntd);
-                        $total = $old_total + $precoTotal;
-                        $qntd = $old_qntd + $quantidade;
-
-                        $sql = "insert into cm values(default,?, ?, ?, ? )";
-
-                        $stmt = $con->prepare($sql);
-
-                        // $cm = $precoTotal/$quantidade;//se atenta nessa linha
-
-                        $result = $stmt->execute([$id_moviement,  $cm, $total, $qntd]);
-                    } catch (PDOException $e) {
-                        echo "erro" . $e->getMessage();
-                    }
-
-                    if ($result) {
-                        $_SESSION['success'] = "cm inserido com sucesso";
-                        
-                    } else {
-                        $_SESSION['erro'] = "erro ao inserir cm";
-                        header('Location: ../../src/movements/index.php');
-                    }
-
-                    ////////////////////////
-                    $stmt = $con->prepare($sql);
-
-                    if ($result = $stmt->execute([$id_old])) {
-
-                        $row = $result->fetch(PDO::FETCH_ASSOC);
-
-                        $oldTotal = $row['total'];
-                    }
-                    //AQUI TAVA FECHADO COM O *   /
-                } else {
-
-                    try {
-                        $sql = "insert into cm values(default,?, ?, ?, ? )";
-
-                        $stmt = $con->prepare($sql);
-
-                        $cm = $precoTotal / $quantidade; //se atenta nessa linha
-
-                        $result = $stmt->execute([$id_moviement,  $cm, $precoTotal, $quantidade]);
-                    } catch (PDOException $e) {
-                        echo "erro " . $e->getMessage();
-                    }
-                    if ($result) {
-                        $_SESSION['success'] = "cm inserido com sucesso";
-                        
-                    } else {
-                        $_SESSION['erro'] = "erro ao inserir cm";
-                        
-                    }
-                }
-            } else {
-                $_SESSION['erro'] = "erro ao inserir movimentação";
-                header('Location: ../../src/movements/index.php');
-            }
-        }
-    }
-
-
-
-    //vai retornar o ultimo indixe, vai buscar 2 e o laco vai achar o ultimo
-    //no caso ele vai pegar o insert penultimo que sera necessario para calcular o cm
-
-    private function penultimoInsert($idAtivo, $idUser)
-    {
-
-        $con = require '../database/connection.php';
-        $sql = "select id_moviements
-    from moviements 
-    where id_ativo = $idAtivo
-    and id_user = $idUser
-    order by id_moviements desc
-    limit 2";
-
-        $result = $con->query($sql);
-
-
-
-        $id_moviement;
-        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-            $id_moviement = $row['id_moviements'];
-        }
-
-
-        return $id_moviement;
-    }
-
-    ////////////////////////////////////////////////////
-
-    private function maxIdMoviement()
-    {
-        //AQUI EU SELECIONO O ULTIMO INDICE DE MOVIMENTACOES PARA USAR NA CM
-        $con = require '../database/connection.php';
-        $sql = "select max(id_moviements) as maximo from moviements where id_user = 2 and id_ativo = 1";
-
-        $result = $con->query($sql);
-
-        $row = $result->fetch(PDO::FETCH_ASSOC);
-
-        $id_moviement = $row['maximo'];
-        return $id_moviement;
-    }
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //a funcao ira verificar se ja ha algum registro desse usuario utilizando 
-    //algum do astivo para que na primeira vez o cm n seja calculado somando 
-    //novamente as coisas
-    private function verificaPrimeiroRegistro($idUser, $idAtivo)
-    {
-        try {
-            $con = require '../database/connection.php';
-
-            $sql = "select id_moviements 
-        from moviements 
-        where id_ativo = $idAtivo 
-        and id_user = $idUser";
-
-
-            $result = $con->query($sql);
-
-            $row = $result->fetch(PDO::FETCH_ASSOC);
-
-            if (isset($row['id_moviements']) && isset($row['id_moviements']) != null) {
-                //se existir a movimentacao retornara false 
-                return false;
-            } else {
-                //se nao existir movimentacao retornara true
-                return true;
-            }
-        } catch (PDOException $e) {
-            echo 'AQUI' . $e->getMessage();
-        }
-    }
-
-    function insertCompraHold()
-    {
-        $iface = $this->inserir();
-    }
-}
-
-$inserir = new movimentController;
-$inserir->insertCompraHold();
-*/
-
 
 session_start();
 require_once '../models/Movimentacoes.php';
 
 
-class movimentsController
+class movimentsController 
 {
-    
+
+    /*
+        da pra fazer assim 
+        
+        private $variavel
+
+        e chamra dentro do metodo assim $this->variavel  *sem o sifrao
+    */
+    private $varr;
+
+    function insert()
+    {
+        if ($this->isSetAllPostItems() && $this->validatePostItems()) {
+
+            $objMoviements = new Movimentacoes;
+            $objMoviements = $this->guardarDados($objMoviements);
+
+            $this->rediretcTpOperation($objMoviements);
+        }
+    }
+
+    ///VALIDACOES
+
+
     private function isSetAllPostItems()
     {
         if (
@@ -227,32 +44,40 @@ class movimentsController
         }
     }
 
-    private function guardarDados($objMoviments)
+    private function validatePostItems()
     {
-
-        if ($this->isSetAllPostItems()) {
-
-
-
-            //$objMoviments->setId_moviements($_POST['id_ativo']);  é inutil
-            $objMoviments->setId_user($_SESSION['id_user']);
-            $objMoviments->setId_ativo($_POST['id_ativo']);
-            $objMoviments->setTp_operation($_POST['tpoperacao']);
-            $objMoviments->setQnt_ativo($_POST['quantidade']);
-            $objMoviments->setCompra_venda($_POST['tpcompra']);
-            $objMoviments->setVlr_ativo($_POST['preco_ativo']);
-            $objMoviments->setVlr_total($_POST['qnt_ativos']);
-            $objMoviments->setDt_moviment($_POST['dt_compra']);
-            $diaAtual = date('Y-m-d');
-            $objMoviments->setDt_registro($diaAtual);
-
-            return $objMoviments;
+        $arrayNambersOfPost = [$_POST['quantidade'], $_POST['preco_ativo'], $_POST['qnt_ativos']];
+        if (!$this->isNumberDecimal($arrayNambersOfPost)) {
+            return false;
         }
+
+        if (!$this->validateOperation()) {
+            return false;
+        }
+
+        return true;
     }
 
-    private function validateOperation($TpOperation)
+    private function isNumberDecimal($arrayNambersOfPost)
     {
-        if ($TpOperation === 'swing' || $TpOperation === 'trade') {
+        $aa = count($arrayNambersOfPost) - 1;
+        for ($i = 0; $i <= $aa; $i++) {
+
+            if (!is_numeric($arrayNambersOfPost[$i])) {
+                return false;
+                $_SESSION['erro'] = 'Erro ao validar numero de opercao' + $arrayNambersOfPost;
+                break;
+            }
+        }
+        return true;
+    }
+
+
+    private function validateOperation()
+    {
+        $tpOperation = $_POST['tpoperacao'];
+
+        if ($tpOperation === 'compra' || $tpOperation === 'trade' || $tpOperation === 'venda') {
             return true;
         } else {
             $_SESSION['erro'] = 'Erro ao validar operacao swing, ou trade';
@@ -260,208 +85,270 @@ class movimentsController
         }
     }
 
-    private function validateBuyOrSale($byuOrSale)
-    {
 
-        if ($byuOrSale === 'compra' || $byuOrSale === 'venda') {
-            return true;
-        } else {
-            $_SESSION['erro'] = 'Erro ao validar operacao de compra ou venda';
-            return false;
+    private function guardarDados($objMoviments)
+    {
+        $objMoviments->setTpOperation($this->defineTpOperation());
+
+        $objMoviments->setIdUser($_SESSION['idUser']);
+        $objMoviments->setIdAtivo($_POST['id_ativo']);
+        $objMoviments->setQntAtivo($_POST['quantidade']);
+        $objMoviments->setVlrAtivo($_POST['preco_ativo']);
+        $objMoviments->setVlrTotal($_POST['qnt_ativos']);
+        $objMoviments->setDtaMoviment($_POST['dt_compra']);
+
+        $diaAtual = date('Y-m-d');
+        $objMoviments->setDtaRecord($diaAtual);
+
+        return $objMoviments;
+    }
+
+    private function defineTpOperation()
+    {
+        $tpOperation = $_POST['tpoperacao'];
+
+        if ($tpOperation === 'compra') {
+            return 1;
+        }
+        if ($tpOperation === 'venda') {
+            return 2;
+        }
+        if ($tpOperation === 'trade') {
+            return 3;
         }
     }
 
-    private function isNumberDecimal($arg)
-    {
-        $aa = count($arg) - 1;
-        for ($i = 0; $i <= $aa; $i++) {
-
-            if (!is_numeric($arg[$i])) {
-                return false;
-                $_SESSION['erro'] = 'Erro ao validar numero de opercao' + $arg;
-                break;
-            }
-        }
-        return true;
-    }
-
-    private function validatePostItems($ObjMoviment)
-    {
-
-        $bayOrSale = $ObjMoviment->getCompra_venda();
-        if (!$this->validateBuyOrSale($bayOrSale)) {
-            return false;
-        }
-
-        $arrayNumericOfValues = [$ObjMoviment->getVlr_ativo(), $ObjMoviment->getVlr_total()];
-        if (!$this->isNumberDecimal($arrayNumericOfValues)) {
-            return false;
-        }
-
-        $tpOperation = $ObjMoviment->getTp_operation();
-        if (!$this->validateOperation($tpOperation)) {
-            return false;
-        }
-
-        return true;
-    }
-
-
-
-    private function insertSwingBuy($objetoMoviements)
-    {
-
-        if ($this->hasAnyMoviement($objetoMoviements)) {
-
-            $this->insertOneMore();
-        } else {
-
-            $this->insertFirstMovSwingBuy($objetoMoviements);
-        }
-    }
-
-    private function insertSwingSel()
-    {
-    }
-
-    private function insertTradeBuy()
-    {
-    }
-
-
-    private function insertFirstMovSwingBuy($obj)
-    {
-        $con = require '../database/connection.php';
-        $user = $obj->getId_user();
-        $ativo = $obj->getId_ativo();
-        $quantidade = $obj->getQnt_ativo();
-        $dt_compra = $obj->getDt_moviment();
-        $preco = $obj->getVlr_ativo();
-        $precoTotal = $obj->getVlr_total();
-        $tpperacao = true;
-        $tpcompra = true;
-        $dtRegistro = $obj->getDt_registro();
-
-
-        $sql = "insert into moviements values(default,?,?,?,?,?,?,?,?,?)";
-        $stmt = $con->prepare($sql);
-        $result = $stmt->execute([$user , $ativo ,$tpperacao, $tpcompra, $quantidade , $preco, $precoTotal, $dt_compra, $dtRegistro ]);
-
-        if ($result) {
-            
-            $this->insertFirstCM($obj);
-        }
-
-        
-    }
-
-    private function calculateFirstCM($precoTotal, $qntd){
-        $cm = $precoTotal / $qntd;
-        return $cm;
-    }
-
-    private function insertFirstCM($obj)
+    private function rediretcTpOperation($objetoMoviements)
     {   
-        $con = require '../database/connection.php';
-        $sql = "insert into cm values(default,?, ?, ?, ? )";
+        if ($objetoMoviements->getTpOperation() === 1) {//compra
 
-        $stmt = $con->prepare($sql);
-        $precoTotal = $obj->getVlr_total();
-        $quantidade = $obj->getQnt_ativo();
-        $cm = $this->calculateFirstCM($precoTotal, $quantidade);
-        $id_moviement = $this->lastIdMoviment($obj);//vai pegar o id inserido anteriormente
+            $this->insertSwingCompra($objetoMoviements);
 
-        $result = $stmt->execute([$id_moviement,  $cm, $precoTotal, $quantidade]);
-        
+        }
 
-        if($result){
-            $_SESSION['success'] = 'movimentacao adicionada com sucesso'; 
-            header('Location: ../../src/movements/index.php');
-            // return true; acho q n precisa
-        }else{
-            $_SESSION['erro'] = 'erro ao adicionar movimentacao';
-            header('Location: ../../src/movements/index.php');
-            //return false;
+        if ($objetoMoviements->getTpOperation() === 2) {//venda
+
+           $this->insertSwingSell($objetoMoviements);
+
+        }
+        if ($objetoMoviements->getTpOperation() === 1) {//trade
+
+            //$this->insertSwingCompra($objetoMoviements);
+
         }
     }
 
-    private function insertOneMore()
+    private function insertSwingCompra($objetoMoviements)
     {
-    }
 
-
-
-
-
-
-    function insert()
-    {
-        $objetoMoviements = new Movimentacoes;
-        $objetoMoviements = $this->guardarDados($objetoMoviements);
-
-        if ($this->validatePostItems($objetoMoviements)) {
-
-            if ($objetoMoviements->getCompra_venda() === 'compra') {
-
-                if ($objetoMoviements->getTp_operation() === 'swing') {
-
-                    $this->insertSwingBuy($objetoMoviements);
-                } 
-
-            } else if ($objetoMoviements->getCompra_venda() === 'venda') {
-
-                if ($objetoMoviements->getTp_operation() === 'swing') {
-                } else if ($objetoMoviements->getTp_operation() === 'trade') {
-                }
-            }
+        if ($this->isTheFirstInsertOfTheUserWithThisAsset($objetoMoviements)) {
+            $this->insertFirstMovSwingBuy($objetoMoviements);
+        } else {
+            $this->insertOneMoreSwingBuy($objetoMoviements);
         }
     }
 
-
-
-
-
-    private function hasAnyMoviement($objetoMoviements)
+    private function isTheFirstInsertOfTheUserWithThisAsset($objetoMoviements)
     {
         try {
 
-            $idUser = $objetoMoviements->getId_user();
-            $idAtivo = $objetoMoviements->getId_ativo();
+            $idUser = $objetoMoviements->getIdUser();
+            $idAtivo = $objetoMoviements->getIdAtivo();
 
             $con = require '../database/connection.php';
 
-            $sql = "select id_moviements 
+            $sql = "select idMoviement 
             from moviements 
-            where id_ativo = $idAtivo 
-            and id_user = $idUser";
+            where idAtivo = $idAtivo 
+            and idUser = $idUser";
 
 
             $result = $con->query($sql);
 
             $row = $result->fetch(PDO::FETCH_ASSOC);
 
-            if (isset($row['id_moviements']) && isset($row['id_moviements']) != null) {
-                //se exitir alguma movimentacao ira retornar true
-                
-                return true;
-            } else {
-                //se nao existir ira retornar false
-                
+            if (isset($row['idMoviement']) && isset($row['idMoviement']) != null) {
+                //IF IS THE USER HAVS ANY ASSET WITH RETURN FALSE
+
                 return false;
+            } else {
+                //IF THE USER HAVS NOT THIS ASSET RETURN TRUE; SAYING THIS IS HER USER FIRST 
+                //INSERT USING THE ASSET
+
+                return true;
             }
         } catch (PDOException $e) {
             echo 'AQUI' . $e->getMessage();
         }
     }
 
+    private function insertFirstMovSwingBuy($obj)
+    {
+        $con = require '../database/connection.php';
+
+        $user = $obj->getIdUser();
+        $ativo = $obj->getIdAtivo();
+        $quantidade = $obj->getQntAtivo();
+        $dt_compra = $obj->getDtaMoviment();
+        $preco = $obj->getVlrAtivo();
+        $precoTotal = $obj->getVlrTotal();
+
+        $tpperacao = $obj->getTpOperation();
+        
+        $dtRegistro = $obj->getDtaRecord();
+
+        $sql = "insert into moviements values(default,?,?,?,?,?,?,?,?)";
+        $stmt = $con->prepare($sql);
+        $result = $stmt->execute([$user, $ativo, $quantidade, $preco, $precoTotal, $dt_compra, $dtRegistro, $tpperacao]);
+
+        if ($result) {
+            $this->insertFirstCM($obj);
+        }
+    }
+
+    private function insertFirstCM($obj)
+    {
+        $con = require '../database/connection.php';
+        $sql = "insert into cm values(default,?, ?, ?, ? )";
+
+        $stmt = $con->prepare($sql);
+        $precoTotal = $obj->getVlrTotal();
+        $quantidade = $obj->getQntAtivo();
+        $cm = $this->calculateFirstCM($precoTotal, $quantidade);
+        $id_moviement = $this->lastIdMoviment($obj); //vai pegar o id inserido anteriormente
+
+        $result = $stmt->execute([$id_moviement,  $cm, $precoTotal, $quantidade]);
+
+
+        if ($result) {
+            $_SESSION['success'] = 'movimentacao adicionada com sucesso';
+            header('Location: ../../src/movements/index.php');
+            // return true; acho q n precisa
+        } else {
+            $_SESSION['erro'] = 'erro ao adicionar movimentacao';
+            header('Location: ../../src/movements/index.php');
+            //return false;
+        }
+    }
+
+    private function calculateFirstCM($precoTotal, $qntd)
+    {
+        $cm = $precoTotal / $qntd;
+        return $cm;
+    }
+
+    //INSERT SWING BUY WHERE THE USER HAS MANY INSERTS
+    private function insertOneMoreSwingBuy($obj)
+    {
+        $argsLastInsert = $this->lastInsert($obj);
+
+        $con = require '../database/connection.php';
+        $user = $obj->getIdUser();
+        $ativo = $obj->getIdAtivo();
+        $quantidade = $obj->getQntAtivo();
+        $dt_compra = $obj->getDtaMoviment();
+        $preco = $obj->getVlrAtivo();
+        $precoTotal = $obj->getVlrTotal();
+        $tpperacao = $obj->getTpOperation();
+        
+        $dtRegistro = $obj->getDtaRecord();
+
+        $sql = "insert into moviements values(default,?,?,?,?,?,?,?,?)";
+        $stmt = $con->prepare($sql);
+        $result = $stmt->execute([$user, $ativo, $quantidade, $preco, $precoTotal, $dt_compra, $dtRegistro, $tpperacao]);
+
+        if ($result) {
+            $this->insertCM($obj, $argsLastInsert);
+        }
+    }
+
+    private function insertCM($obj, $arg)
+    {
+        
+    
+            $vlrTotalAnterior = $arg['vlrTotal'];
+            $qntTotalAnterior = $arg['qntdAtivos'];
+    
+        
+
+        $con = require '../database/connection.php';
+        $sql = "insert into cm values(default,?, ?, ?, ? )";
+
+        $stmt = $con->prepare($sql);
+
+        $precoTotal = $obj->getVlrTotal() + $vlrTotalAnterior;
+        $quantidade = $obj->getQntAtivo() + $qntTotalAnterior;
+
+        $cm = $this->calculateCM($precoTotal, $quantidade, $arg);
+
+
+
+        $id_moviement = $this->lastIdMoviment($obj); //vai pegar o id inserido anteriormente
+
+        $result = $stmt->execute([$id_moviement,  $cm, $precoTotal, $quantidade]);
+
+
+        if ($result) {
+            $_SESSION['success'] = 'movimentacao adicionada com sucesso';
+            header('Location: ../../src/movements/index.php');
+            // return true; acho q n precisa
+        } else {
+            $_SESSION['erro'] = 'erro ao adicionar movimentacao';
+            header('Location: ../../src/movements/index.php');
+            //return false;
+        }
+    }
+
+    private function calculateCM($precoTotal, $quantidade, $arg)
+    {
+        
+            $vlrTotalAnterior = $arg['vlrTotal'];
+            $qntTotalAnterior = $arg['qntdAtivos'];
+        
+
+        $cm = ($vlrTotalAnterior + $precoTotal) / ($qntTotalAnterior + $quantidade);
+        return $cm;
+    }
+
+
+    private function lastInsert($obj)
+    {
+        $idAtivo = $obj->getIdAtivo();
+        $idUser = $obj->getIdUser();
+
+        $con = require '../database/connection.php';
+
+        $sql = "select vlrTotal, qntdAtivos
+        from moviements 
+        where idAtivo = '$idAtivo'
+        and idUser = '$idUser'
+        order by idMoviement desc
+        limit 1";
+
+        $result = $con->query($sql);
+
+
+
+        $id_moviement;
+        while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+            $id_moviement = $row;
+        }
+
+
+        return $id_moviement;
+    }
+
+
+
+
     private function lastIdMoviment($obj)
     {
         //seleciono o id da ultima movimentacao feita para vincular a movimentacao com o cm usando esse id
-        $id_user = $obj->getId_user();
-        $id_ativo = $obj->getId_ativo();
+        $id_user = $obj->getIdUser();
+        $id_ativo = $obj->getIdAtivo();
 
         $con = require '../database/connection.php';
-        $sql = "select max(id_moviements) as maximo from moviements where id_user = $id_user and id_ativo = $id_ativo";
+        $sql = "select max(idMoviement) as maximo from moviements where idUser = $id_user and idAtivo = $id_ativo";
 
         $result = $con->query($sql);
 
@@ -471,42 +358,38 @@ class movimentsController
         return $id_moviement;
     }
 
+
+    private function insertSwingSell($obj){
+
+        if($this->isTheFirstInsertOfTheUserWithThisAsset($obj)){
+            $_SESSION['erro'] = "Voce nao possui nenhuma movimentacao com esse ativo";
+        }else{
+            
+            $argsLastInsert = $this->lastInsert($obj);
+
+            $con = require '../database/connection.php';
+            $user = $obj->getIdUser();
+            $ativo = $obj->getIdAtivo();
+            $quantidade = $obj->getQntAtivo();
+            $dt_compra = $obj->getDtaMoviment();
+            $preco = $obj->getVlrAtivo();
+            $precoTotal = $obj->getVlrTotal();
+            $tpperacao = $obj->getTpOperation();
+            
+            $dtRegistro = $obj->getDtaRecord();
+    
+            $sql = "insert into moviements values(default,?,?,?,?,?,?,?,?)";
+            $stmt = $con->prepare($sql);
+            $result = $stmt->execute([$user, $ativo, $quantidade, $preco, $precoTotal, $dt_compra, $dtRegistro, $tpperacao]);
+    
+            if ($result) {
+                $this->insertCM($obj, $argsLastInsert);
+            }
+
+        }
+    }
 }
 
-
-
-    //tem q ver certo isso aqui
-    /*
-        $this->guardarDados();
-
-        if($a->getTp_operation() == 'swing'){
-
-            if($a->getCompra_venda() == 'compra'){
-
-            }
-            else if($a->getCompra_venda() == 'venda'){
-                
-            }
-
-        }
-        else if($a->getTp_operation() == 'trade'){
-
-        }
-        
-        */
-
-/*
-private $qnt_ativo;
-    private $vlr_ativo;
-    private $vlr_total;
-    private $dt_moviment;
-    private $dt_registro;
-
-
-$a = new movimentsController;
-$objeto = $a->guardarDados();
-print_r($objeto);
- */
 
 $a = new movimentsController;
 $a->insert();

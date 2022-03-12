@@ -7,10 +7,24 @@
     <title>Document</title>
 </head>
 <body>
-    <form action="../../controllers/AtivoController.php" >
-        <button>
-            
-        </button>
-    </form>
+    
+<?php 
+    /*
+    $select = require  '../../database/sql.php';
+    $select = select('moviements','idUser, idMoviement');
+    var_dump($select);
+    */
+
+    $insert = require  '../../database/sql.php';
+    $nome = 'eu';
+    $insert = insert("teste",  " '$nome' , 18 ");
+
+    if($insert){
+        echo  'deu certo';
+    }else{
+        echo  'deu errrado';
+        var_dump($insert);
+    }
+?>
 </body>
 </html>
